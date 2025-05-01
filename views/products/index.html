@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Go product</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg bg-primary">
+        <div class="container">
+          <a class="navbar-brand text-white" href="#">Go product</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+              <li class="nav-item">
+                <a class="nav-link active text-white" href="/product">Product</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active text-light" href="/categories">Categories</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+    </nav>
+     <!-- Navbar -->
+      
+    <div class = "container mt-3">
+        <h2 class="">Product</h2>
+        <a href="/product/add" class="btn btn-primary">Add Product</a>
+      <table class="table table-bordered mt-2 text-center">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Stock</th>
+            <th>Price</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{range .Products}}
+          <tr>
+            <td>{{.Name}}</td>
+            <td>{{.Stock}}</td>
+            <td>{{printf "%.0f" .Price}}</td>
+            <td>{{.Category.Name}}</td>
+            <td>{{.Description}}</td>
+            <td>
+              <a
+                href="/product/edit?id={{.ID}}"
+                class="btn btn-sm btn-warning text-light"
+                >Edit</a
+              >
+              <a
+                href="/product/delete?id={{.ID}}"
+                onclick="return confirm('Are you sure want to delete this product ?')"
+                class="btn btn-sm btn-danger"
+                >Delete</a
+              >
+            </td>
+          </tr>
+          {{end}}
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>
