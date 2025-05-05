@@ -83,7 +83,7 @@ func Update(id int, product entities.Product) bool {
 			stock = $4,
 			description = $5,
 			updated_at = $6 
-			WHERE id = NOW()`,
+			WHERE id = $7`,
 
 		product.Name,
 		product.Price,
