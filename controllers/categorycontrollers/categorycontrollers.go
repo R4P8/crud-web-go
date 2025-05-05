@@ -112,7 +112,8 @@ func Delete(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	}
 
 	if err := categorymodels.Delete(id); err != nil {
-		panic(err)
+		http.Error(w, "Failed to delete category", http.StatusInternalServerError)
+		return
 	}
 
 	http.Redirect(w, r, "/categories", http.StatusSeeOther)
