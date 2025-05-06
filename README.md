@@ -1,1 +1,1 @@
-# curd-web-go
+# crud-web-go
