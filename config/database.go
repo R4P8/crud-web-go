@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -8,12 +9,12 @@ import (
 
 	"github.com/XSAM/otelsql"
 	_ "github.com/lib/pq"
-	"go.opentelemetry.io/otel/semconv/v1.21.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 )
 
 var DB *sql.DB
 
-func DatabaseConnection() {
+func DatabaseConnection(ctx context.Context) {
 	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
 	user := os.Getenv("DB_USER")
@@ -33,7 +34,7 @@ func DatabaseConnection() {
 		log.Fatalf("DB connection error: %v", err)
 	}
 
-	if err = DB.Ping(); err != nil {
+	if err = DB.PingContext(ctx); err != nil {
 		log.Fatalf("Ping failed: %v", err)
 	}
 
