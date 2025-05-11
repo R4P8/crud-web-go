@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"curd-web-go/config"
 	"curd-web-go/routes"
 	"curd-web-go/tracing"
@@ -19,11 +20,12 @@ func main() {
 	}
 
 	// Init Tracer
-	cleanup := tracing.InitTracer()
-	defer cleanup()
+	ctx := context.Background()
+	shutdown := tracing.InitTracer(ctx, "crud-web-go", "jaeger.rizqifathirafa.my.id:4317")
+	defer shutdown(ctx)
 
 	// Connect Database
-	config.DatabaseConnection()
+	config.DatabaseConnection(ctx)
 	if config.DB == nil {
 		log.Fatal("Database connection failed!")
 	}
