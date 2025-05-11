@@ -3,36 +3,44 @@ package tracing
 import (
 	"context"
 	"log"
+	"net/http"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
-	"go.opentelemetry.io/otel/sdk/trace"
-	"go.opentelemetry.io/otel/semconv/v1.17.0"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
+
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
-func InitTracer() func() {
-	ctx := context.Background()
-
-	// OTLP HTTP Exporter (default port: 4318)
-	exporter, err := otlptracehttp.New(ctx)
-	if err != nil {
-		log.Fatalf("Failed to create OTLP exporter: %v", err)
-	}
-
-	tp := trace.NewTracerProvider(
-		trace.WithBatcher(exporter),
-		trace.WithResource(resource.NewWithAttributes(
-			semconv.SchemaURL,
-			semconv.ServiceName("crud-web-go"),
-		)),
+func InitTracer(ctx context.Context, serviceName, otlpEndpoint string) func(context.Context) error {
+	exp, err := otlptracehttp.New(ctx,
+		otlptracehttp.WithEndpoint(otlpEndpoint),
+		otlptracehttp.WithInsecure(),
 	)
-
-	otel.SetTracerProvider(tp)
-
-	return func() {
-		if err := tp.Shutdown(ctx); err != nil {
-			log.Fatalf("Error shutting down tracer provider: %v", err)
-		}
+	if err != nil {
+		log.Fatalf("failed to create OTLP exporter: %v", err)
 	}
+
+	res, err := resource.New(ctx,
+		resource.WithAttributes(
+			semconv.ServiceNameKey.String(serviceName),
+		),
+	)
+	if err != nil {
+		log.Fatalf("failed to create resource: %v", err)
+	}
+
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(exp),
+		sdktrace.WithResource(res),
+	)
+	otel.SetTracerProvider(tp)
+	otel.SetTextMapPropagator(propagation.TraceContext{})
+
+	http.DefaultClient.Transport = otelhttp.NewTransport(http.DefaultTransport)
+
+	return tp.Shutdown
 }
