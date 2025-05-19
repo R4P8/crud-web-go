@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -16,9 +16,9 @@ import (
 )
 
 func InitTracer(ctx context.Context, serviceName, otlpEndpoint string) func(context.Context) error {
-	exp, err := otlptracehttp.New(ctx,
-		otlptracehttp.WithEndpoint(otlpEndpoint),
-		otlptracehttp.WithInsecure(),
+	exp, err := otlptracegrpc.New(ctx,
+		otlptracegrpc.WithEndpoint(otlpEndpoint),
+		otlptracegrpc.WithInsecure(),
 	)
 	if err != nil {
 		log.Fatalf("failed to create OTLP exporter: %v", err)
