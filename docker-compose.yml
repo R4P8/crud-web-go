@@ -1,28 +1,160 @@
 version: '3.9'
 
 services:
-  curd-web-go:
-    container_name: curd-web-go
-    build: .
-    ports:
-      - "8000:8080"
-    environment:
-      DATABASE_URL: "host=db user=postgres password=admin123 dbname=product_db sslmode=disable"
-    depends_on:
-      - db
-
   db:
     container_name: postgres-db
     image: postgres:16
     environment:
-      POSTGRES_PASSWORD: admin123
-      POSTGRES_USER: postgres
-      POSTGRES_DB: product_db
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_DB: ${DB_NAME}
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - observability
+
+  crud-web-go1:
+    container_name: crud-web-go1
+    build: .
+    environment:
+      DATABASE_URL: "host=${DB_HOST} user=${DB_USER} password=${DB_PASSWORD} dbn                                                                                                                ame=${DB_NAME} sslmode=disable"
+      OTEL_EXPORTER_OTLP_ENDPOINT: grpc://otel-collector:4317
+    depends_on:
+      - db
+    ports:
+      - "8081:8080"
+    restart: always
+    networks:
+      - observability
+
+
+  crud-web-go2:
+    container_name: crud-web-go2
+    build: .
+    environment:
+      DATABASE_URL: "host=${DB_HOST} user=${DB_USER} password=${DB_PASSWORD} dbn                                                                                                                ame=${DB_NAME} sslmode=disable"
+      OTEL_EXPORTER_OTLP_ENDPOINT: grpc://otel-collector:4317
+    depends_on:
+      - db
+    ports:
+      - "8082:8080"
+    restart: always
+    networks:
+      - observability
+
+
+  crud-web-go3:
+    container_name: crud-web-go3
+    build: .
+    environment:
+      DATABASE_URL: "host=${DB_HOST} user=${DB_USER} password=${DB_PASSWORD} dbn                                                                                                                ame=${DB_NAME} sslmode=disable"
+      OTEL_EXPORTER_OTLP_ENDPOINT: grpc://otel-collector:4317
+    depends_on:
+      - db
+    ports:
+      - "8083:8080"
+    restart: always
+    networks:
+      - observability
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx-lb
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      - crud-web-go1
+      - crud-web-go2
+      - crud-web-go3
+    restart: always
+    networks:
+      - observability
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.123.0
+    container_name: otel-collector
+    volumes:
+      - ./otel-config.yaml:/etc/otelcol/config.yaml
+    command: ["--config=/etc/otelcol/config.yaml"]
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "8888:8888"
+    depends_on:
+      - jaeger
+    restart: always
+    networks:
+      - observability
+      - monitoring
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.56
+    container_name: jaeger
+    ports:
+      - "16686:16686"
+    restart: always
+    networks:
+      - observability
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring
+
+  node-exporter:
+    image: prom/node-exporter
+    container_name: node-exporter
+    ports:
+      - "9100:9100"
+    networks:
+      - monitoring
+
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    user: root
+    ports:
+      - "8085:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - observability
+    restart: always
 
 volumes:
   pgdata:
+  grafana-storage:
+  jenkins_home:
+
+networks:
+  observability:
+  monitoring:
 
