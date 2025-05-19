@@ -8,6 +8,8 @@ import (
 	"log"
 	"net/http"
 
+
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"github.com/joho/godotenv"
 )
 
@@ -21,7 +23,7 @@ func main() {
 
 	// Init Tracer
 	ctx := context.Background()
-	shutdown := tracing.InitTracer(ctx, "crud-web-go", "jaeger.rizqifathirafa.my.id:4317")
+	shutdown := tracing.InitTracer(ctx, "crud-web-go", "otel-collector:4317")
 	defer shutdown(ctx)
 
 	// Connect Database
@@ -30,8 +32,9 @@ func main() {
 		log.Fatal("Database connection failed!")
 	}
 
-	router := routes.Routes()
+	handler := otelhttp.NewHandler(routes.Routes(), "http-server")
 
 	log.Println(" Server running on port 8080")
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(":8080", handler))
 }
+
