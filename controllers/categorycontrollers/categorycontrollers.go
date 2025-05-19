@@ -1,120 +1,130 @@
 package categorycontrollers
 
 import (
-	"curd-web-go/entities"
-	"curd-web-go/models/categorymodels"
-	"net/http"
-	"strconv"
-	"text/template"
-	"time"
+        "curd-web-go/entities"
+        "curd-web-go/models/categorymodels"
+        "net/http"
+        "strconv"
+        "text/template"
+        "time"
 
-	"github.com/julienschmidt/httprouter"
+        "github.com/julienschmidt/httprouter"
 )
 
 func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	categories := categorymodels.GetAll()
-	data := map[string]any{
-		"categories": categories,
-	}
+        ctx := r.Context()
+        categories := categorymodels.GetAll(ctx)
 
-	temp, err := template.ParseFiles("views/category/index.html")
-	if err != nil {
-		panic(err)
-	}
+        data := map[string]any{
+                "categories": categories,
+        }
 
-	err = temp.Execute(w, data)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+        temp, err := template.ParseFiles("views/category/index.html")
+        if err != nil {
+                panic(err)
+        }
+
+        err = temp.Execute(w, data)
+        if err != nil {
+                http.Error(w, err.Error(), http.StatusInternalServerError)
+                return
+        }
 }
 
 func Add(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	if r.Method == "GET" {
-		temp, err := template.ParseFiles("views/category/create.html")
-		if err != nil {
-			panic(err)
-		}
-		temp.Execute(w, nil)
-	}
+        ctx := r.Context()
 
-	if r.Method == "POST" {
-		var categories entities.Category
+        if r.Method == "GET" {
+                temp, err := template.ParseFiles("views/category/create.html")
+                if err != nil {
+                        panic(err)
+                }
+                temp.Execute(w, nil)
+        }
 
-		categories.Name = r.FormValue("name")
-		categories.UpdatedAt = time.Now()
-		categories.CreatedAt = time.Now()
+        if r.Method == "POST" {
+                var categories entities.Category
 
-		if ok := categorymodels.Create(categories); !ok {
-			// kalau gagal insert, render lagi create page
-			temp, _ := template.ParseFiles("views/category/create.html")
-			temp.Execute(w, nil)
-		}
+                categories.Name = r.FormValue("name")
+                categories.UpdatedAt = time.Now()
+                categories.CreatedAt = time.Now()
 
-		// Kalau sukses, redirect ke /categories
-		http.Redirect(w, r, "/categories", http.StatusSeeOther)
-	}
+                if ok := categorymodels.Create(ctx, categories); !ok {
+                        // kalau gagal insert, render lagi create page
+                        temp, _ := template.ParseFiles("views/category/create.html")
+                        temp.Execute(w, nil)
+                        return
+                }
+
+                // Kalau sukses, redirect ke /categories
+                http.Redirect(w, r, "/categories", http.StatusSeeOther)
+        }
 }
 
 func Edit(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	if r.Method == "GET" {
-		temp, err := template.ParseFiles("views/category/edit.html")
-		if err != nil {
-			panic(err)
-		}
+        ctx := r.Context()
 
-		IdString := r.URL.Query().Get("id")
-		id, err := strconv.Atoi(IdString)
-		if err != nil {
-			panic(err)
-		}
+        if r.Method == "GET" {
+                temp, err := template.ParseFiles("views/category/edit.html")
+                if err != nil {
+                        panic(err)
+                }
 
-		categories := categorymodels.Detail(id)
+                IdString := r.URL.Query().Get("id")
+                id, err := strconv.Atoi(IdString)
+                if err != nil {
+                        panic(err)
+                }
 
-		data := map[string]any{
-			"categories": categories,
-		}
+                categories := categorymodels.Detail(ctx, id)
 
-		temp.Execute(w, data)
+                data := map[string]any{
+                        "categories": categories,
+                }
 
-	}
+                temp.Execute(w, data)
 
-	if r.Method == "POST" {
-		err := r.ParseForm()
-		if err != nil {
-			panic(err)
-		}
+        }
 
-		idString := r.FormValue("id")
-		id, err := strconv.Atoi(idString)
-		if err != nil {
-			panic(err)
-		}
+        if r.Method == "POST" {
+                err := r.ParseForm()
+                if err != nil {
+                        panic(err)
+                }
 
-		var categories entities.Category
-		categories.Name = r.FormValue("name")
-		categories.UpdatedAt = time.Now()
+                idString := r.FormValue("id")
+                id, err := strconv.Atoi(idString)
+                if err != nil {
+                        panic(err)
+                }
 
-		if ok := categorymodels.Update(id, categories); !ok {
-			http.Redirect(w, r, r.Header.Get("Referer"), http.StatusSeeOther)
-			return
-		}
+                var categories entities.Category
+                categories.Name = r.FormValue("name")
+                categories.UpdatedAt = time.Now()
 
-		http.Redirect(w, r, "/categories", http.StatusSeeOther) // ke halaman setelah update berhasil
-	}
+                if ok := categorymodels.Update(ctx, id, categories); !ok {
+                        http.Redirect(w, r, r.Header.Get("Referer"), http.StatusSeeOther)
+                        return
+                }
+
+                http.Redirect(w, r, "/categories", http.StatusSeeOther) // ke halaman setelah update berhasil
+        }
 }
 
 func Delete(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	IdString := r.URL.Query().Get("id")
-	id, err := strconv.Atoi(IdString)
-	if err != nil {
-		panic(err)
-	}
+        ctx := r.Context()
 
-	if err := categorymodels.Delete(id); err != nil {
-		http.Error(w, "Failed to delete category", http.StatusInternalServerError)
-		return
-	}
+        IdString := r.URL.Query().Get("id")
+        id, err := strconv.Atoi(IdString)
+        if err != nil {
+                panic(err)
+        }
 
-	http.Redirect(w, r, "/categories", http.StatusSeeOther)
+        if err := categorymodels.Delete(ctx, id); err != nil {
+                http.Error(w, "Failed to delete category", http.StatusInternalServerError)
+                return
+        }
+
+        http.Redirect(w, r, "/categories", http.StatusSeeOther)
 }
+
