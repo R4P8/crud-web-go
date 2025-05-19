@@ -8,10 +8,8 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o curd-web-go .
+RUN go build -o crud-web-go .
 
 EXPOSE 8000
 
-CMD ["./curd-web-go"]
-
-
+CMD ["./crud-web-go"]
