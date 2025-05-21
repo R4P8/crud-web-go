@@ -1,5 +1,9 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'golang:1.23'
+        }
+    }
 
     environment {
         DOCKER_IMAGE_NAME = 'crud-web-go'
@@ -8,7 +12,7 @@ pipeline {
     }
 
     stages {
-        stage ('Checkout') {
+        stage('Checkout') {
             steps {
                 checkout scm
             }
@@ -29,9 +33,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    sh "docker build -t ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} ."
-                }
+                sh "docker build -t ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} ."
             }
         }
 
