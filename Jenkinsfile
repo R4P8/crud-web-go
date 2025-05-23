@@ -1,10 +1,6 @@
 pipeline {
-    agent {
-        docker {
-            image 'golang:1.23.0'
-        }
-    }
-
+    agent any{
+       
     environment {
         DOCKER_IMAGE_NAME = 'crud-web-go'
         DOCKER_IMAGE_TAG = '1.23.0'
