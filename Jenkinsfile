@@ -1,5 +1,10 @@
 pipeline {
-    agent any 
+     agent {
+        docker {
+            image 'rizqirafa8/golang-with-docker:1.23.0'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    } 
     
     environment {
         DOCKER_IMAGE_NAME = 'crud-web-go'
