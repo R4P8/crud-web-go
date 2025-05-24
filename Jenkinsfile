@@ -8,7 +8,7 @@ pipeline {
     
     environment {
         DOCKER_IMAGE_NAME = 'crud-web-go'
-        DOCKER_IMAGE_TAG = '1.0'
+        DOCKER_IMAGE_TAG = '1.23.0'
         DOCKER_USERNAME = 'rizqirafa8'
     }
 
