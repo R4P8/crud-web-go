@@ -1,7 +1,7 @@
 pipeline {
      agent {
         docker {
-            image 'rizqirafa8/golang-with-docker:1.23.0'
+            image 'rizqirafa8/go-with-docker'
             args '-v /var/run/docker.sock:/var/run/docker.sock'
         }
     } 
