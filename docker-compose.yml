@@ -149,6 +149,13 @@ services:
       - observability
     restart: always
 
+  redis:
+    image: redis:latest
+    container_name: redis_server
+    ports:
+      - 6379:6379
+    command: [ "redis-server", "--requirepass", "${REDIS_PASSWORD}" ]
+
 volumes:
   pgdata:
   grafana-storage:
