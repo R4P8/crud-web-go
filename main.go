@@ -8,9 +8,8 @@ import (
 	"log"
 	"net/http"
 
-
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"github.com/joho/godotenv"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 func main() {
@@ -32,9 +31,12 @@ func main() {
 		log.Fatal("Database connection failed!")
 	}
 
+	if _, err := config.InitRedis(); err != nil {
+		log.Fatalf("Redis initialization failed: %v", err)
+	}
+
 	handler := otelhttp.NewHandler(routes.Routes(), "http-server")
 
 	log.Println(" Server running on port 8080")
 	log.Fatal(http.ListenAndServe(":8080", handler))
 }
-
