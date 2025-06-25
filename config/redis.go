@@ -2,17 +2,15 @@ package config
 
 import (
 	"context"
-	"log"
-	"os"
-
 	"github.com/redis/go-redis/v9"
+	"log"
 )
 
 var RedisClient *redis.Client
 
 func InitRedis() (*redis.Client, error) {
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     os.Getenv("REDIS_PORT"),
+		Addr:     "redis:6379",
 		Password: "",
 		DB:       0,
 	})
