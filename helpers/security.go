@@ -1,7 +1,6 @@
 package helpers
 
 import (
-	"os"
 	"regexp"
 	"strings"
 	"sync"
@@ -29,8 +28,12 @@ func IsStrongPassword(password string) bool {
 	if len(password) < 8 {
 		return false
 	}
-	hasNumber := strings.ContainsAny(password, os.Getenv("PASSWORD"))
-	hasSymbol := strings.ContainsAny(password, os.Getenv("PASSWORD_HASH"))
+
+	numbers := "0123456789"
+	symbols := `@#$%^&*()-_=+[]{}|;:,.<>/?`
+
+	hasNumber := strings.ContainsAny(password, numbers)
+	hasSymbol := strings.ContainsAny(password, symbols)
 	return hasNumber && hasSymbol
 }
 
