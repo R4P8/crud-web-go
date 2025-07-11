@@ -22,7 +22,7 @@ A robust, scalable CRUD web application built with **Go** and **PostgreSQL**, ar
 
 ## 🧱 System Architecture
 
-![Architecture Diagram](Arsitektur.png)
+![Architecture Diagram](Picture/Arsitektur.png)
 ### 👤 User
 The end user interacts with the system via a web browser through the **frontend interface**.
 
