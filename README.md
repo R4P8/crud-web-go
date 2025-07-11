@@ -83,7 +83,7 @@ The end user interacts with the system via a web browser through the **frontend 
 
 This project integrates **Jaeger** for distributed tracing. The screenshot below shows a trace of an HTTP request handled by the service `crud-web-go`, specifically the `GetAllCategories` operation.
 
-![Jaeger Tracing Example](tracingjaeger.jpg)
+![Jaeger Tracing Example](Picture/tracingjaeger.jpg)
 
 🌐 URL : http://jaeger.rizqifathirafa.my.id/search
 
@@ -102,7 +102,7 @@ The trace consists of the following span hierarchy:
 
 ### 📊 Load Test Result (Visualized on Grafana)
 
-![K6 Load Test on Grafana](loadtesting.jpg)
+![K6 Load Test on Grafana](Picture/loadtesting.jpg)
 
 ### 📌 Key Metrics Observed
 
@@ -158,9 +158,9 @@ Each stage is executed sequentially and displayed in Jenkins’ visual interface
 
 ### 📷 Visuals
 
-![CI/CD Pipeline Flow](pipeline.jpg)
+![CI/CD Pipeline Flow](Picture/pipeline.jpg)
 
-![Jenkins Stage View](jenkins.jpg)
+![Jenkins Stage View](Picture/jenkins.jpg)
 
 ## 📦 Conclusion
 
