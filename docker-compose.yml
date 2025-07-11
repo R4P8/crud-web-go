@@ -18,45 +18,57 @@ services:
 
   crud-web-go1:
     container_name: crud-web-go1
-    build: .
+    image: rizqirafa8/crud-web-go:1.23.0
     environment:
-      DATABASE_URL: "host=${DB_HOST} user=${DB_USER} password=${DB_PASSWORD} dbn                                                                                                                ame=${DB_NAME} sslmode=disable"
+      DATABASE_URL: "host=${DB_HOST} user=${DB_USER} password=${DB_PASSWORD} dbname=${DB_NAME} sslmode=disable"
+      REDIS_PORT: redis:6379
       OTEL_EXPORTER_OTLP_ENDPOINT: grpc://otel-collector:4317
     depends_on:
+      - redis
       - db
     ports:
       - "8081:8080"
     restart: always
+    env_file:
+      - .env
     networks:
       - observability
 
 
   crud-web-go2:
     container_name: crud-web-go2
-    build: .
+    image: rizqirafa8/crud-web-go:1.23.0
     environment:
-      DATABASE_URL: "host=${DB_HOST} user=${DB_USER} password=${DB_PASSWORD} dbn                                                                                                                ame=${DB_NAME} sslmode=disable"
+      DATABASE_URL: "host=${DB_HOST} user=${DB_USER} password=${DB_PASSWORD} dbname=${DB_NAME} sslmode=disable"
+      REDIS_PORT: redis:6379
       OTEL_EXPORTER_OTLP_ENDPOINT: grpc://otel-collector:4317
     depends_on:
+      - redis
       - db
     ports:
       - "8082:8080"
     restart: always
+    env_file:
+      - .env
     networks:
       - observability
 
 
   crud-web-go3:
     container_name: crud-web-go3
-    build: .
+    image: rizqirafa8/crud-web-go:1.23.0
     environment:
-      DATABASE_URL: "host=${DB_HOST} user=${DB_USER} password=${DB_PASSWORD} dbn                                                                                                                ame=${DB_NAME} sslmode=disable"
+      DATABASE_URL: "host=${DB_HOST} user=${DB_USER} password=${DB_PASSWORD} dbname=${DB_NAME} sslmode=disable"
+      REDIS_PORT: redis:6379
       OTEL_EXPORTER_OTLP_ENDPOINT: grpc://otel-collector:4317
     depends_on:
+      - redis
       - db
     ports:
       - "8083:8080"
     restart: always
+    env_file:
+      - .env
     networks:
       - observability
 
@@ -109,6 +121,7 @@ services:
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     command:
+      - '--web.enable-remote-write-receiver'
       - '--config.file=/etc/prometheus/prometheus.yml'
     ports:
       - "9090:9090"
@@ -122,6 +135,19 @@ services:
       - "3000:3000"
     volumes:
       - grafana-storage:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring
+
+  k6:
+    image: grafana/k6
+    container_name: k6
+    entrypoint: [""]
+    command: >
+      sh -c "k6 run --out experimental-prometheus-rw=http://prometheus:9090/api/v1/write /scripts/login-test.js"
+    volumes:
+      - ./scripts:/scripts
     depends_on:
       - prometheus
     networks:
@@ -154,7 +180,10 @@ services:
     container_name: redis_server
     ports:
       - 6379:6379
-    command: [ "redis-server", "--requirepass", "${REDIS_PASSWORD}" ]
+    restart: always
+    networks:
+      - observability
+
 
 volumes:
   pgdata:
@@ -164,4 +193,3 @@ volumes:
 networks:
   observability:
   monitoring:
-
