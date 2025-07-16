@@ -1,6 +1,6 @@
-# Go CRUD Web Application
+# Go Product Management System
 
-A robust, scalable CRUD web application built with **Go** and **PostgreSQL**, architected using the **MVC** pattern, and designed with performance, observability, and deployment in mind.
+A robust, scalable backend service built with **Go** and **PostgreSQL**, architected using the **MVC** pattern, and designed with performance, observability, and deployment in mind.
 
 ---
 
